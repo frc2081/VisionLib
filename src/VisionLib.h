@@ -7,34 +7,51 @@
 #ifndef SRC_VISIONLIB_H_
 #define SRC_VISIONLIB_H_
 
-#include <GripPipeline.h>
+#include <GripPipelineBase.h>
+#include <GripGroup.h>
+#include <opencv2/videoio/videoio.hpp>
 #include <vector>
+#include <string>
+#include <map>
+#include <thread>
+#include "WPILib.h"
+#include "NetworkTables/NetworkTable.h"
 
 namespace VisionLib
 {
-	class VisionLib {
+class VisionLib;
+class GripGroup;
+
+class VisionLib {
 	public:
+		VisionLib();
 		/* Functions to add a new camera */
 		void AddCamera();
 		void AddCamera(int camera);
 
+		void AddGripPipeline(std::string pipelinename,
+							 grip::GripPipelineBase *GripPipeline);
 
-	private:
-		VisionLib() {}
-		void Update();
+		void AddGripGroup(std::string pipelinename,
+				          grip::GripPipelineBase pipeline,
+						  std::vector<int> cameras,
+						  int outputtype);
 
-	protected:
+		cv::VideoCapture* GetCamera(int index);
+
 		std::vector<cv::VideoCapture> cameras;
 
-	public:
-		/* Overloads for singleton */
-		VisionLib(VisionLib const&) = delete;
-		void operator=(VisionLib const&) = delete;
+/* Don't change anything in the file past this point */
 
 		/* Overloads for convenience */
 		void operator++();
 		void operator++(int);
 		cv::VideoCapture* operator[](int index);
-	};
+
+	private:
+		std::vector<GripGroup> _groups;
+		std::map<std::string, grip::GripPipelineBase> _pipelines;
+		void Update();
+};
 }
 #endif /* SRC_MAIN_H_ */
